@@ -7,6 +7,8 @@
 \usepackage{courier}  %Required
 \usepackage{url}  %Required
 \usepackage{graphicx}  %Required
+
+
 \usepackage{graphicx,float,url,multirow,makecell,booktabs,color,subfigure,caption,setspace}
 \usepackage{amsmath}
 \usepackage{times}
@@ -19,15 +21,14 @@
 \setlength{\pdfpagewidth}{8.5in}  %Required
 \setlength{\pdfpageheight}{11in}  %Required
 %PDF Info Is Required:
-  \pdfinfo{
-/Title (2018 Formatting Instructions for Authors Using LaTeX)
-/Author (AAAI Press Staff)}
+\pdfinfo{/Title (2018 Formatting Instructions for Authors Using LaTeX)/Author (AAAI Press Staff)
+}
+
 \setcounter{secnumdepth}{0}
  \begin{document}
 % The file aaai.sty is the style file for AAAI Press
 % proceedings, working notes, and technical reports.
 %
-
 
 
 \newcommand{\argmin}{\operatornamewithlimits{argmin}}
@@ -46,34 +47,33 @@
 
 \title{Generalization Tower Network: \\
 A Novel Deep Neural Network Architecture for Multi-Task Learning}
-\author{AAAI Press\\
-Association for the Advancement of Artificial Intelligence\\
-2275 East Bayshore Road, Suite 160\\
-Palo Alto, California 94303\\
-}
+%\author{AAAI Press\\
+%Association for the Advancement of Artificial Intelligence\\
+%2275 East Bayshore Road, Suite 160\\
+%Palo Alto, California 94303\\
+%}
+\author{Removed for Review}
 \maketitle
 \begin{abstract}
-Deep learning (DL) advances state-of-the-art reinforcement learning (RL), by incorporating deep neural networks in learning representations from the input to RL. However, the conventional deep neural network architecture is limited in learning representations for multi-task RL (MT-RL), as multiple tasks refer to different kinds of representations. In this paper, we thus propose a novel deep neural network architecture, namely generalization tower network (GTN), which can achieve MT-RL within a single learned model. Specifically, the architecture of GTN is composed of both horizontal and vertical streams. In our GTN architecture, horizontal streams are used to learn representation shared in similar tasks. In contrast, the vertical streams are introduced to be more suitable for handling diverse tasks, which encodes hierarchical shared knowledge of these tasks. The effectiveness of the introduced vertical stream is validated by experimental results. Experimental results further verify that our GTN architecture is able to advance the state-of-the-art MT-RL, via being tested on 51 Atari games.
+Deep learning (DL) advances state-of-the-art reinforcement learning (RL), by incorporating deep neural networks in learning representations from the input to RL. However, the conventional deep neural network architecture is limited in learning representations for multi-task RL (MT-RL), as multiple tasks can refer to different kinds of representations. In this paper, we thus propose a novel deep neural network architecture, namely generalization tower network (GTN), which can achieve MT-RL within a single learned model. Specifically, the architecture of GTN is composed of both horizontal and vertical streams. In our GTN architecture, horizontal streams are used to learn representation shared in similar tasks. In contrast, the vertical streams are introduced to be more suitable for handling diverse tasks, which encodes hierarchical shared knowledge of these tasks. The effectiveness of the introduced vertical stream is validated by experimental results. Experimental results further verify that our GTN architecture is able to advance the state-of-the-art MT-RL, via being tested on 51 Atari games.
 \end{abstract}
 
 \section{Introduction}
 Reinforcement learning (RL) is an active research area of artificial intelligence (AI). It aims at making a computer, as the agent, take actions in an environment to maximize the cumulative reward. The past decades have witnessed the evolution of RL \cite{sutton1998reinforcement}, especially the recent development of deep RL (DRL) \cite{mnih2015human}. The recent DRL almost achieves human-level intelligence in mastering single task, for a small yet growing set of scenarios. Unfortunately, DRL is still in its infancy for handling more than one task, i.e., multi-task RL (MT-RL) \cite{caruana1998multitask}.
 
-\begin{figure}[ht]
+For MT-RL, recent works have already achieved notable advances on inter-task transfer, showing the feasibility of transferring learned knowledge from one task to another. Actor-mimic \cite{parisotto16_actormimic} and policy distillation \cite{rusu2015policy} leverage techniques from model compression to perform state-of-the-art inter-task transfer. Beyond inter-task transfer, multi-task generalization has also been considered in MT-RL. For example, shared representations have been verified to be formable, when facing diverse tasks \cite{borsa2016learning,romoff2016deep}. The approach of progressive networks \cite{rusu2016progressive} is insightful to transfer knowledge from the hidden layers of previously learned model to learn a never-experienced task. Yet, its multi-task ability is accomplished by storing all learned models and relying on inference to specify a corresponding model when switching to a specific task.
+
+Despite all recent achievements for MT-RL, the multi-task generalization is still limited, or requires all learned models to be stored and then be manually selected according to the task. To avoid such limitation, this paper proposes\footnote{Due to double blind reviewing policy, we will release our code later. } a novel deep neural network architecture for MT-RL, which is capable of handling all tasks within a single model. It is worth pointing out that our architecture can be easily combined with the existing MT-RL algorithms, e.g., actor-mimic \cite{parisotto16_actormimic}, policy distillation \cite{rusu2015policy}, progressive networks \cite{rusu2016progressive} and EWC \cite{kirkpatrick2017overcoming}, as our work mainly focuses on the architecture of deep neural network for MT-RL.
+\begin{figure*}[htbp]
 	\begin{center}
-		\centerline{\includegraphics[width=\columnwidth]{figure/csfg2}}%of
+		\centerline{\includegraphics[width=0.9\textwidth]{figure/csfg2}}%of
 		\caption{\textit{Hierarchical shared knowledge} in shooting games. \textbf{\textit{SpaveInvaders}} can obtain high scores by knowledge \textit{shoot continuously}, since there are substantial and intensive targets. As for \textbf{\textit{Phoenix}}, the targets are much fewer but are all valid targets, high scores are obtained with knowledge \textit{aim to targets and then shoot continuously}. \textbf{\textit{Carnival}} is much more demanding for the players, since there are both bad targets and good targets. Thus, we should \textit{aim to valid targets and then shoot continuously}. Thus, all three shooting games share knowledge of \textit{shoot continuously}. Both \textbf{\textit{Phoenix}} and \textbf{\textit{Carnival}} games have knowledge of \textit{aim to targets and then shoot continuously}. Only \textbf{\textit{Carnival}} holds knowledge of \textit{aim to valid targets and then shoot continuously}.}
 		\label{shoot}
 	\end{center}
-\end{figure}
-
-For MT-RL, recent works have already achieved notable advances on inter-task transfer, showing the feasibility of transferring learned knowledge from one task to another. Actor-mimic \cite{parisotto16_actormimic} and policy distillation \cite{rusu2015policy} leverage techniques from model compression to perform state-of-the-art inter-task transfer. Beyond inter-task transfer, multi-task generalization has also been considered in MT-RL. For example, shared representations have been verified to be formable, when facing diverse tasks \cite{borsa2016learning, romoff2016deep}. The approach of progressive networks \cite{rusu2016progressive} is insightful to transfer knowledge from the hidden layers of previously learned model to learn a never-experienced task. Yet, its multi-task ability is accomplished by storing all learned models and relying on inference to specify a corresponding model when switching to a specific task.
-
-Despite all recent achievements for MT-RL, the multi-task generalization is still limited, or requires all learned models to be stored and then be manually selected according to the task. To avoid such limitation, this paper proposes\footnote{Due to double blind reviewing policy, we will release our code later. } a novel deep neural network architecture for MT-RL, which is capable of handling all tasks within a single model. It is worth pointing out that our architecture can be easily combined with the existing MT-RL algorithms, e.g., actor-mimic \cite{parisotto16_actormimic}, policy distillation \cite{rusu2015policy}, progressive networks \cite{rusu2016progressive} and EWC \cite{kirkpatrick2017overcoming}, as our work mainly focuses on the architecture of deep neural network for MT-RL.
-
+\end{figure*}
 To be more specific, this paper proposes the generalization tower network (GTN), a novel deep neural network architecture for MT-RL.
 The proposed GTN is inspired by our finding in Figure \ref{shoot}, which implies that similar tasks in MT-RL share some hierarchical common knowledge, called \textit{hierarchical shared knowledge}.
-As shown in Figure \ref{shoot}, we find that all shooting games\footnote{For obtaining scores, we asked 10 volunteers aging from 18 to 26 to play these \textit{shooting games}. All of them are naive to these games, avoiding the influence of prior knowledge. The volunteers were told to play the games only with three kinds of knowledge: I. \textit{shoot continuously}, II. \textit{aim to targets and then shoot continuously} and III. \textit{aim to valid targets and then shoot continuously}. Scores of games are not displayed (by occlusion) for making knowledge valid.  With each knowledge, they play three shooting games in a random order, each for 90 seconds.} in Atari \cite{bellemare2013arcade,1606.01540} need to \textit{shoot continuously}, and some of them may further require \textit{shooting to targets} or even \textit{shooting to valid targets}.
+As shown in Figure \ref{shoot}, we find that all shooting games\footnote{For obtaining scores, we asked 10 volunteers aging from 18 to 26 to play these \textit{shooting games}. All of them are naive to these games, avoiding the influence of prior knowledge. The volunteers were told to play the games only with three kinds of knowledge: I. \textit{shoot continuously}, II. \textit{aim to targets and then shoot continuously} and III. \textit{aim to valid targets and then shoot continuously}. Scores of games are not displayed (by occlusion) for making knowledge valid.  With each knowledge, they play three shooting games in a random order, each for 90 seconds.} in Atari \cite{bellemare2013arcade} need to \textit{shoot continuously}, and some of them may further require \textit{shooting to targets} or even \textit{shooting to valid targets}.
 Thus, knowledge needs to be encoded in hierarchy for different tasks of MT-RL.
 Accordingly, our GTN architecture has both horizontal and vertical streams.
 Horizontal streams learn to extract multi-layer representations from high-dimensional input, whereas vertical streams generalize \textit{hierarchical shared knowledge}.
@@ -83,37 +83,9 @@ More importantly, experimental results show that our GTN approach is better than
 
 \section{Related Work}
 \label{Related Work}
-
-\subsection{Deep Reinforcement Learning}
-Taking advantage of recent success in deep learning (DL) \cite{lecun2015deep} and long-existing research RL \cite{sutton1998reinforcement}, DRL has made great progress, starting from deep $Q$-learning \cite{mnih2015human}. Notable advances include double $Q$-learning \cite{van2016deep}, experience replay \cite{schaul2015prioritized}, dueling networks \cite{wang2016dueling}, and asynchronous methods \cite{mnih2016asynchronous}. Utilizing advances from these key achievements, A3C in \cite{mnih2016asynchronous} achieves the state-of-the-art performance in mastering RL tasks, reaching human level intelligence in various domains. However, in spite of the existing achievements, agents in above RL works are still limited to learning and mastering one task at a time.
-
-\subsection{Multi-Task Reinforcement Learning}
-MT-RL is crucial in the RL area, which learns more than one task at a time. In this regard, the ultimate goals for MT-RL can be classified as:
-(1) \textbf{Inter-Task Transfer}, i.e., the RL model learned for one task can help in learning other tasks;
-(2) \textbf{Multi-Task Generalization}, i.e.,  multiple tasks can be handled by learning a single RL model.
-Above topics have long been reputed as a critical challenge in many AI works \cite{ring1994continual, silver2013lifelong, taylor2011introduction}. Recent advances in this topic can be generally divided into following two directions.
-
-\paragraph{Inter-Task Transfer.}
-Inter-Task transfer works primarily focus on how to transfer knowledge from the learned model to a new one, when facing a new task.
-Upon such transfer, the new learned models are capable of mastering more tasks, in a way that different tasks are learned one by one.
-However, the main challenge for inter-task transfer is \textit{catastrophic forgetting} \cite{mccloskey1989catastrophic,mcclelland1995there,ratcliff1990connectionist}, which means that the newly learned knowledge may completely break previous learned knowledge of old tasks. There are some novel advances to this issue, such as \cite{rusu2016progressive,fahlman1990cascade,kirkpatrick2017overcoming,rusu2015policy,terekhov2015knowledge,parisotto16_actormimic}.
-
-\paragraph{Multi-Task Generalization.} Multi-Task generalization \cite{borsa2016learning, romoff2016deep, sermanet2016unsupervised} works generally concentrate on how to make agent master several RL tasks only with a single learned model. Linking pre-knowledge towards any tasks, the agent is greatly confused by the diversity of state representations and strategies. In short, multi-task generalization in RL mainly aims at learning a generalized model across diverse tasks. In this direction, previous works have been proposed with novel models and algorithms that are more capable of generalizing and transferring with shared representations. For example, the latest literature \cite{borsa2016learning} verifies the practicability of learning shared representations of value functions. However, it has been proved \cite{romoff2016deep} that a completely shared model performs poorly. Furthermore, to deal with the problem of \textit{task diversity}, the agent in \cite{romoff2016deep} is designed to have different hidden layers and output layers for each task, remaining shared convolutional layers across all tasks. However, it can only learn to master 3 Atari games. An additional network \cite{sermanet2016unsupervised} has been designed to detect which task is the agent facing, and then to favor or select a corresponding stream in the model.
-
-In summary, recent works have made great advances in MT-RL. However, they still use conventional deep neural network architecture, which does not consider \textit{hierarchical shared knowledge} across multiple tasks. This leads to poor generalization ability in mastering diverse tasks, which can be solved by the proposed GTN architecture presented in the following.
-
-\section{Generalization Tower Network}
-
-In this section, we introduce our GTN approach for MT-RL, which learns to master multiple RL tasks in a single learned model.
-Specifically, the architecture of GTN is proposed in Section \ref{section-archi-of-gtn}.
-Then, Section \ref{section-asyn-mtrl-framework} presents how GTN is implemented to work on multi-task scenarios in an asynchronous way, so that all tasks go through the same GTN model without requiring any task labels.
-
-\subsection{Architecture of GTN}
-\label{section-archi-of-gtn}
-
-\begin{figure}
+\begin{figure*}[htb]
 	\begin{center}
-		\centerline{\includegraphics[width=\columnwidth]{figure/figure-main-framework}}
+		\centerline{\includegraphics[width=0.82\textwidth]{figure/figure-main-framework}}
 		\caption{
 			Architecture of Generalization Tower Network (GTN).
 			As shown in this figure, GTN contains both horizontal and vertical streams.
@@ -122,7 +94,35 @@ Then, Section \ref{section-asyn-mtrl-framework} presents how GTN is implemented 
 		}
 		\label{figure-main-framework}
 	\end{center}
-\end{figure}
+\end{figure*}
+\subsection{Deep Reinforcement Learning}
+Taking advantage of recent success in deep learning (DL) \cite{lecun2015deep} and long-existing research in RL \cite{sutton1998reinforcement}, DRL has made great progress, starting from deep $Q$-learning \cite{mnih2015human}. Notable advances include double $Q$-learning \cite{van2016deep}, prioritized experience replay \cite{schaul2015prioritized}, dueling networks \cite{wang2016dueling}, and asynchronous methods \cite{mnih2016asynchronous}. Utilizing advances from these key achievements, A3C in \cite{mnih2016asynchronous} achieves the state-of-the-art performance in mastering RL tasks, reaching human level intelligence in various domains. However, in spite of the existing achievements, agents in above RL works are still limited to learning and mastering one task at a time.
+
+\subsection{Multi-Task Reinforcement Learning}
+MT-RL is crucial in the RL area, which learns more than one task at a time. In this regard, the ultimate goals for MT-RL can be classified as:
+(1) \textbf{Inter-Task Transfer}, i.e., the RL model learned for one task can help in learning other tasks;
+(2) \textbf{Multi-Task Generalization}, i.e.,  multiple tasks can be handled by learning a single RL model.
+Above topics have long been reputed as a critical challenge in many AI works \cite{ring1994continual,silver2013lifelong,taylor2011introduction}. Recent advances in this topic can be generally divided into following two directions.
+
+\paragraph{Inter-Task Transfer.}
+Inter-Task transfer works primarily focus on how to transfer knowledge from the learned model to a new one, when facing a new task.
+Upon such transfer, the new learned models are capable of mastering more tasks, in a way that different tasks are learned one by one.
+However, the main challenge for inter-task transfer is \textit{catastrophic forgetting} \cite{mccloskey1989catastrophic,mcclelland1995there,ratcliff1990connectionist}, which means that the newly learned knowledge may completely break previous learned knowledge of old tasks. There are some novel advances to this issue  \cite{rusu2016progressive,fahlman1990cascade,kirkpatrick2017overcoming,rusu2015policy,terekhov2015knowledge,parisotto16_actormimic}.
+
+\paragraph{Multi-Task Generalization.} Multi-Task generalization \cite{borsa2016learning,romoff2016deep,sermanet2016unsupervised} generally concentrates on how to make an agent master several RL tasks only with a single learned model. Linking pre-knowledge towards any tasks, the agent is greatly confused by the diversity of state representations and strategies. In short, multi-task generalization in RL mainly aims at learning a generalized model across diverse tasks. In this direction, previous works have been proposed with novel models and algorithms that are more capable of generalizing and transferring with shared representations. For example, the latest literature \cite{borsa2016learning} verifies the practicability of learning shared representations of value functions. However, it has been demonstrated that a completely shared model performs poorly \cite{romoff2016deep}. Furthermore, to deal with the problem of \textit{task diversity}, the agent in \cite{romoff2016deep} is designed to have different hidden layers and output layers for each task, remaining shared convolutional layers across all tasks. However, it can only learn to master 3 Atari games. An additional network \cite{sermanet2016unsupervised} has been designed to detect which task is the agent facing, and then to favor or select a corresponding stream in the model.
+
+In summary, recent works have made great advances in MT-RL. However, they still use conventional deep neural network architecture, which does not consider \textit{hierarchical shared knowledge} across multiple tasks. This leads to poor generalization ability in mastering diverse tasks, which can be solved by the proposed GTN architecture presented in the following.
+
+
+\section{Generalization Tower Network}
+
+In this section, we introduce our GTN approach for MT-RL, which learns to master multiple RL tasks in a single learned model.
+Specifically, the architecture of GTN is proposed at first.
+Then, we present how GTN is implemented to work on multi-task scenarios in an asynchronous way, so that all tasks go through the same GTN model without requiring any task labels.
+
+\subsection{Architecture of GTN}
+\label{section-archi-of-gtn}
+
 
 Figure \ref{figure-main-framework} shows the architecture of GTN.
 We can see from this figure that the input to GTN is frame content from the game emulator, and the output is state value $V$ and policy $\pi$.
@@ -135,10 +135,30 @@ In the following, we present the horizontal and vertical streams of our GTN arch
 \paragraph{Horizontal streams with multi-layers.}
 To present the horizontal streams of GTN, we take the horizontal stream at the \textit{level 1} in (Figure \ref{figure-main-framework}) as an example.
 The horizontal stream of GTN contains multiple convolutional layers, i.e., $C_{(1,1)}\rightarrow C_{(1,2)}\rightarrow,...,\rightarrow C_{(1,n)} \rightarrow,...,\rightarrow C_{(1,N)}$, to learn features from the high-dimensional input. Thus, the horizontal stream contains layers $\{1, \cdots, n, \cdots, N\}$.
-Finally, the convolutional layer is flatted into a vector with flatten layer ($F$), followed by a single LSTM layer ($L_1$) to model the temporal correlation of RL tasks.
+Finally, the convolutional layer is flattened into a vector with flatten layer ($F$), followed by a single LSTM layer ($L_1$) to model the temporal correlation of RL tasks.
 For the LSTM chunk, we use the standard LSTM \cite{hochreiter1997long} which includes input, forget and output gates.
 Thus, the horizontal stream of our GTN mainly produces traditional representations features of deep convolutional neural network \cite{simonyan2014very} and learns temporal information with LSTM, the same as \cite{hausknecht2015deep}. Similar structure holds for horizontal streams at other levels.
-
+\begin{figure*}[htb]
+	\begin{center}
+		\centerline{\includegraphics[width=1\linewidth]{figure/figure-asyn-mtrl-framework}}
+		\caption{Mastering multiple tasks with a single GTN model: implement GTN asynchronously.}
+		\label{figure-asyn-mtrl-framework}
+	\end{center}
+\end{figure*}
+\begin{figure*}[htb]
+  \centering
+    \subfigure[]{
+    \label{figure-generalize-analysis-task}
+    \includegraphics[width=0.45\textwidth]{figure/figure-generalize-analysis-task}}
+  \subfigure[]{
+    \label{figure-generalize-analysis-epi}
+    \includegraphics[width=0.45\textwidth]{figure/figure-generalize-analysis-epi}}
+  \caption{
+    (a): RAPS variance at different number of tasks.
+    For obtaining RAPS, the experiment was conducted on a series of GTNs with $N=4$ and $M=4$, learning to master 1 to 18 \textit{shooting games} from Atari. The results were obtained at 100M training episodes.
+    (b): RAPS variance alongside training episodes, obtained in learning all 18 \textit{shooting games}.
+  }
+\end{figure*}
 \paragraph{Vertical stream with multi-levels.}
 Our GTN architecture includes the vertical streams with levels $\{1, \cdots, m, \cdots, M\}$.
 Specifically, after the first convolutional layer at \textit{level 1}, i.e., $C_{(1,1)}$, the stream of GTN splits into two sub-streams.
@@ -156,21 +176,15 @@ where $\{ \textbf{T}_1, \cdots \textbf{T}_m \cdots, \textbf{T}_M\}$ are learned 
 Note that $\textbf{T}_{m}\in\mathbb{R}^{S \times A}$, where $S$ is the size of LSTM layer and $A$ is the size of concatenation layer.
 The vertical stream aims to model \textit{hierarchical shared knowledge}, making our GTN fit to different tasks.
 
+
 \subsection{Implementation of GTN in asynchronous method}
 \label{section-asyn-mtrl-framework}
 
-\begin{figure}
-	\begin{center}
-		\centerline{\includegraphics[width=\columnwidth]{figure/figure-asyn-mtrl-framework}}
-		\caption{Mastering multiple tasks with a single GTN model: implement GTN asynchronously.}
-		\label{figure-asyn-mtrl-framework}
-	\end{center}
-\end{figure}
 
 To learn multiple tasks with a single GTN model, we develop an asynchronous method to implement GTN based on \cite{mnih2016asynchronous}.
 Our asynchronous method is summarized in Figure \ref{figure-asyn-mtrl-framework}.
 Specifically, there is one thread (thread $0$) holding a global GTN and each of other multiple threads (thread $1,..., i$) holding a local GTN and a game emulator.
-Note that both global and local GTNs use the same architecture as discussed in Section \ref{section-archi-of-gtn}.
+Note that both global and local GTNs use the same architecture as depicted in Figure \ref{figure-main-framework}.
 In a single episode for each thread, the following procedure is conducted.
 \begin{itemize}
     \item  Stage 1: The thread copies all parameters from global GTN to its own local GTN.
@@ -181,7 +195,7 @@ In a single episode for each thread, the following procedure is conducted.
 At Stage 2, the local GTN and the game emulator interact with each other for several steps $\{1,\cdots t \cdots, t_{max}\}$.
 At step $t$, GTN obtains \textit{observation} $o_t$ from the game emulator, which is the frame content gray-scaled and down-sampled to $42 \times 42$.
 Then, observation $o_t$ is provided to GTN, together with the LSTM feature from the GTN at last step $f_{t-1}$.
-Afterwards, GTN produces a set of policy with different size, corresponding to the size-varied actions of MT-RL.
+Afterwards, GTN produces a set of policies with different size, corresponding to the size-varied actions of MT-RL.
 Given policy $\pi$, action $a_t$ can be generated with standard deviation $\varepsilon$ to ensure exploration.
 According to $a_t$, the game emulator updates from $o_t$ to $o_{t+1}$, returning a step reward $r_t$.
 At the end of step $t$, a set of experiences $\{o_t,f_{t-1},a_t,r_t\}$ is stored for updating parameters at Stage 3.
@@ -204,21 +218,6 @@ where $r_i$ is the step reward, and $\gamma$ (=0.99) is the discount factor for 
 \section{Generalization Analysis}
 \label{section-generalization-analysis}
 
-\begin{figure}
-  \centering
-    \subfigure[]{
-    \label{figure-generalize-analysis-task}
-    \includegraphics[width=.49\linewidth]{figure/figure-generalize-analysis-task}}
-  \subfigure[]{
-    \label{figure-generalize-analysis-epi}
-    \includegraphics[width=.49\linewidth]{figure/figure-generalize-analysis-epi}}
-  \caption{
-    (a): RAPS variance at different number of tasks.
-    For obtaining RAPS, the experiment was conducted on a series of GTNs with $N=4$ and $M=4$, learning to master 1 to 18 \textit{shooting games} from Atari. The results were obtained at 100M training episodes.
-    (b): RAPS variance alongside training episodes, obtained in learning all 18 \textit{shooting games}.
-  }
-\end{figure}
-
 Now, we analyze the generalization ability of our GTN approach across multiple tasks. In this paper, generalization ability refers to the performance of GTN, when mastering different numbers of tasks within a single learned model.
 Since our GTN introduces the vertical stream for learning multiple tasks, we investigate the generalization ability of GTN at different levels of the vertical stream.
 For such investigation, we measure the average perturbation sensitivity (APS) \cite{rusu2016progressive}, which indicates how much the final output relies on a specific level of GTN.
@@ -227,7 +226,7 @@ Then, we measure the impact of this perturbation on the performance, using APS.
 In this paper, APS is measured by the percentage of score dropping, due to the noise perturbation. We compute the relative APS (RAPS) via dividing APS by the sum of the APSs of all streams, to investigate the relative dependency of different levels of GTN.
 
 Figure \ref{figure-generalize-analysis-task} shows the RAPS results of different levels in GTN, when learning 1 to 18 tasks.
-The results are obtained by running our GTN approach, averaged over all \textit{shooting games} of Atari.
+The results are obtained by running our GTN approach, averaged over all \textit{shooting games} of Atari as list in Figure \ref{figure-resn-1}.
 From Figure \ref{figure-generalize-analysis-task}, we can see that RAPS of high-level (e.g., levels 3 and 4) is increased at more tasks.
 This indicates that when learning to master more tasks, GTN turns to rely on higher levels.
 Thus, the proposed architecture of GTN, especially the vertical stream, is effective in improving the generalization ability for MT-RL.
@@ -235,6 +234,37 @@ Figure \ref{figure-generalize-analysis-epi} further draws the RAPS results of di
 One may observe that RAPS can be increased at more training episodes, for high-level in GTN (e.g., levels 3 and 4).
 By contrast, RAPS of low-level decreases alongside increased episodes.
 In a word, more levels in the vertical stream and larger number of training episodes are required for improving the generalization ability for MT-RL.
+\begin{figure*}[htb]
+	\begin{center}
+		\centerline{\includegraphics[width=0.92\textwidth]{figure/figure-resn-1}}
+		\caption{
+                Comparison of RFS over classified Atari games: \textit{Shooting Games} and \textit{Adventure Games}.
+            }
+		\label{figure-resn-1}
+	\end{center}
+\end{figure*}
+
+\begin{figure*}[htb]
+	\begin{center}
+		\centerline{\includegraphics[width=0.92\textwidth]{figure/figure-resn-2}}
+		\caption{
+                Comparison of RFS over classified Atari games: \textit{Maze Games}, \textit{Pinball Games}, \textit{First Person Shooter Games} and \textit{Puzzle Games}.
+            }
+		\label{figure-resn-2}
+	\end{center}
+\end{figure*}
+
+\begin{figure*}[htb]
+  \centering
+  \subfigure[]{
+    \label{figure-ablative-study-s}
+    \includegraphics[width=0.43\textwidth]{figure/figure-ablative-study-s}}
+  \subfigure[]{
+    \label{figure-ablative-study-m}
+    \includegraphics[width=0.43\textwidth]{figure/figure-ablative-study-m}}
+  \caption{RFS results of our GTN approach at different $M$ and $N$ for mastering (a) single task and (b) multiple tasks. Note that the RFS results are averaged over all \textit{shooting games} of Atari. For single task, each game is individually played by \textit{agent} of GTN. For multiple tasks, all games are synchronously played by \textit{agent} of GTN.
+  }
+\end{figure*}
 
 
 \section{Experiment}
@@ -242,10 +272,10 @@ In a word, more levels in the vertical stream and larger number of training epis
 \subsection{Setup}
 \label{section-exp-setup}
 
-In our experiments, we manually divide the Atari games into 6 categories, according to the similarity of tasks. All tasks belonging to each category can be found from Figures \ref{figure-resn-1} to \ref{figure-resn-2}. They cover 51 of total 57 Atari games, and the remaining 6 games are hard to be classified. Thus, our experiments were conducted on those 51 games.
+In our experiments, we manually divide the Atari games into 6 categories, according to the similarity of tasks. All tasks belonging to each category can be found from Figures \ref{figure-resn-1} and \ref{figure-resn-2}. They cover 51 of total 57 Atari games, and the remaining 6 games are hard to be classified. Thus, our experiments were conducted on those 51 games.
 
 \paragraph{GTN Setup.}
-The GTN is simply set with the number of levels being 4 ($M=4$) in vertical streams and the number of layers being 4 ($N=4$) in horizontal streams.
+The GTN is simply set with 4 levels ($M=4$) in vertical streams and 4 layers ($N=4$) in horizontal streams.
 In our GTN, the architecture of each horizontal stream is the same as that of A3C \cite{mnih2016asynchronous}, for fair comparison.
 Specifically, for all convolutional layers, the kernel size is $3 \times 3$ and the number of kernels is 32.
 The stride during convolution is set to 2.
@@ -281,37 +311,6 @@ In a word, the above analysis indicates that the horizonal stream in our GTN app
 
 \subsection{Evaluation on Performance.}
 
-\begin{figure}
-	\begin{center}
-		\centerline{\includegraphics[width=\columnwidth]{figure/figure-resn-1}}
-		\caption{
-                Comparison of RFS over classified Atari games: \textit{Shooting Games} and \textit{Adventure Games}.
-            }
-		\label{figure-resn-1}
-	\end{center}
-\end{figure}
-
-\begin{figure}
-	\begin{center}
-		\centerline{\includegraphics[width=\columnwidth]{figure/figure-resn-2}}
-		\caption{
-                Comparison of RFS over classified Atari games: \textit{Maze Games}, \textit{Pinball Games}, \textit{First Person Shooter Games} and \textit{Puzzle Games}.
-            }
-		\label{figure-resn-2}
-	\end{center}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \subfigure[]{
-    \label{figure-ablative-study-s}
-    \includegraphics[width=.49\linewidth]{figure/figure-ablative-study-s}}
-  \subfigure[]{
-    \label{figure-ablative-study-m}
-    \includegraphics[width=.49\linewidth]{figure/figure-ablative-study-m}}
-  \caption{RFS results of our GTN approach at different $M$ and $N$ for mastering (a) single task and (b) multiple tasks. Note that the RFS results are averaged over all \textit{shooting games} of Atari. For single task, each game is individually played by \textit{agent} of GTN. For multiple tasks, all games are synchronously played by \textit{agent} of GTN.
-  }
-\end{figure}
 
 This section compares the RFS results between the proposed GTN and conventional MT-A3C \cite{romoff2016deep}, both based on \cite{mnih2016asynchronous}. In particular, MT-A3C means that the asynchronous MT-RL framework is implemented with the same traditional deep neural network architecture as A3C, instead of our GTN.
 It is worth mentioning that we do not compare against progressive network \cite{rusu2016progressive}. It is because progressive network \cite{rusu2016progressive} requires manual inference to select corresponding stored model for different tasks, whereas our GTN approach requires no task labels and enables mastering multi-tasks in one model. In other words, it is unfair to compare our approach with \cite{rusu2016progressive}.
@@ -329,6 +328,8 @@ Different from the conventional MT-RL approaches, the vertical stream proposed i
 This is mainly motivated by the fact that multiple tasks may share common knowledge in hierarchy.
 Experimental results also showed that our GTN approach improves the performance of A3C in MT-RL, over 51 Atari games.
 
+
+\clearpage
 \bibliographystyle{aaai}
 \bibliography{aaai2018_gtn}
 

@@ -1,0 +1,10 @@
+1. Ensure that concepts are introduced before being used. For instance, in the Introduction, the terms inter-task RL and multi-task RL are being used without being defined. I was asking myself exactly what the authors mean until I reached the Related Work section, where these concepts were properly explained
+2.  One of the central concepts in the paper, "hierarchical shared knowledge", is never properly defined in the paper. It is hard to understand what the authors actually mean by it. The authors hint at it in the Introduction but the provided explanation does not really help. Figure 1 is more concrete, but such a central concept should be properly formalized
+3. It reads: "Linking pre-knowledge towards any tasks...". What is pre-knowledge? This was never properly defined
+4. It reads: "GTN to master multiple tasks, in which higher levels learn more representation(s) features that lower ones." What is a representation feature
+5. MT-A3C should be briefly explained. It is never properly discussed despite being the author¡¯s main baselin
+
+
+Don't use S and A to define the size of the LSTM and the size of the concatenation layer. In RL
+these letters have a well-defined meaning.
+
